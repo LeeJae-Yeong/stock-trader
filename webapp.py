@@ -26,11 +26,14 @@ def get_recommendations(fast_mode: bool = True):
     if _cache["data"] and _cache["time"]:
         elapsed = (datetime.now() - _cache["time"]).total_seconds()
         if elapsed < CACHE_MIN * 60:
-            return _cache["data"]
+            out = _cache["data"].copy()
+            out["updated_at"] = _cache["time"].strftime("%Y-%m-%d %H:%M")
+            return out
 
     trend = run_trend_recommender()
     rising = run_rising_star_recommender(limit=8) if fast_mode else run_rising_star_recommender()
 
+    now = datetime.now()
     data = {
         "trend": [
             {
@@ -53,8 +56,9 @@ def get_recommendations(fast_mode: bool = True):
             }
             for r in rising[:10]
         ],
+        "updated_at": now.strftime("%Y-%m-%d %H:%M"),
     }
-    _cache = {"data": data, "time": datetime.now()}
+    _cache = {"data": data, "time": now}
     return data
 
 
@@ -86,6 +90,7 @@ h1{font-size:18px;margin-bottom:12px;color:#fff}
 ul{margin:4px 0 0 18px;font-size:13px;color:#bbb}
 .section{margin-top:20px;font-size:14px;color:#888;border-bottom:1px solid #333;padding-bottom:6px}
 .caption{font-size:11px;color:#555;margin-top:20px}
+.updated{font-size:12px;color:#00d9ff;margin:12px 0;padding:8px 12px;background:rgba(0,217,255,.1);border-radius:8px}
 </style>
 </head>
 <body>
@@ -117,6 +122,7 @@ async function run(){
       h+='</ul></div>';
     }
     if(d.rising.length===0)h+='<div class="card">조건에 맞는 종목 없음</div>';
+    if(d.updated_at)h='<p class="updated">5분 단위 갱신 · 마지막 갱신: '+d.updated_at+'</p>'+h;
     out.innerHTML=h;
   }catch(e){out.innerHTML='<div class="loading">오류: '+e.message+'</div>'}
   btn.disabled=false;
