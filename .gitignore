@@ -1,0 +1,33 @@
+# 환경 변수 (API 키 등 민감 정보)
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.env/
+
+# 데이터/모델
+data/*.csv
+data/*.json
+models/*.pkl
+models/*.h5
+models/*.pt
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 로그
+logs/
+*.log

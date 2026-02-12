@@ -1,0 +1,37 @@
+---
+description: AI 연동 주식 트레이더 프로젝트 코딩 표준 및 규칙
+alwaysApply: true
+---
+
+# Stock Trader 프로젝트 규칙
+
+## 프로젝트 구조
+
+- `config/` - 설정 파일, 환경 변수 로드
+- `data/` - 과거/실시간 시세 데이터
+- `models/` - 학습된 AI 모델 파일
+- `src/api/` - 증권사 API 연동
+- `src/ml/` - AI 모델 학습·추론
+- `src/strategy/` - 트레이딩 전략
+- `src/utils/` - 공통 유틸
+
+## 코딩 규칙
+
+- **언어**: 한국어 주석, 변수·함수명은 영문
+- **API 키**: 절대 코드에 하드코딩 금지. `os.getenv()` 또는 설정 모듈 사용
+- **로깅**: print 대신 logging 모듈 사용
+
+## 에러 처리
+
+```python
+# ❌ BAD
+response = api.get_price()
+price = response['price']
+
+# ✅ GOOD
+response = api.get_price()
+if not response.success:
+    logger.error("API 호출 실패", extra={"response": response})
+    raise TradingAPIError("가격 조회 실패")
+price = response.data['price']
+```

@@ -1,0 +1,32 @@
+---
+description: API 키 보안 및 환경 변수 처리 규칙
+globs: config/**/*, **/*.py, **/*.ts, **/*.tsx
+alwaysApply: false
+---
+
+# API 키 보안 규칙
+
+## 금지 사항
+
+- API 키, 시크릿을 소스코드에 직접 작성하지 않음
+- `.env` 파일을 Git에 커밋하지 않음
+- 로그에 민감 정보 출력 금지
+
+## 올바른 사용
+
+```python
+# config에서 로드
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_KEY = os.getenv("KIS_APP_KEY")
+API_SECRET = os.getenv("KIS_APP_SECRET")
+```
+
+## 설정 파일
+
+- `env.example`을 복사하여 `.env` 생성
+- `.env`에 실제 키 입력 후 사용
+- `env.example`은 예시만 포함, 실제 키는 포함하지 않음
