@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from src.data import (
     fetch_stock_data,
+    get_market_scan_universe,
     get_rising_star_universe,
     get_watchlist,
 )
@@ -26,9 +27,14 @@ from src.recommender import (
 )
 
 
-def run_trend_recommender() -> list[Recommendation]:
-    """관심종목 스크리닝 (추세 기반)"""
-    watchlist = get_watchlist()
+def run_trend_recommender(
+    market: str = "kr", scope: str = "watchlist"
+) -> list[Recommendation]:
+    """추세 기반 스크리닝. market: 'kr'|'us', scope: 'watchlist'|'market'"""
+    if scope == "market":
+        watchlist = get_market_scan_universe(market=market, limit=25)
+    else:
+        watchlist = get_watchlist(market=market)
     results: list[Recommendation] = []
 
     for symbol, name in watchlist:

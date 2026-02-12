@@ -44,7 +44,7 @@ def fetch_kosdaq_list() -> pd.DataFrame:
     return fdr.StockListing("KOSDAQ")
 
 
-# 관심 종목 기본 리스트 (거래 활성 종목 위주)
+# 한국 관심 종목 (거래 활성 종목 위주)
 DEFAULT_WATCHLIST: list[tuple[str, str]] = [
     ("005930", "삼성전자"),
     ("000660", "SK하이닉스"),
@@ -63,10 +63,82 @@ DEFAULT_WATCHLIST: list[tuple[str, str]] = [
     ("373220", "LG에너지솔루션"),
 ]
 
+# 미국 관심 종목 (티커, 종목명)
+US_WATCHLIST: list[tuple[str, str]] = [
+    ("AAPL", "Apple"),
+    ("MSFT", "Microsoft"),
+    ("GOOGL", "Alphabet (Google)"),
+    ("AMZN", "Amazon"),
+    ("NVDA", "NVIDIA"),
+    ("META", "Meta"),
+    ("TSLA", "Tesla"),
+    ("BRK-B", "Berkshire Hathaway"),
+    ("JPM", "JPMorgan Chase"),
+    ("V", "Visa"),
+    ("JNJ", "Johnson & Johnson"),
+    ("WMT", "Walmart"),
+    ("PG", "Procter & Gamble"),
+    ("UNH", "UnitedHealth"),
+    ("HD", "Home Depot"),
+]
 
-def get_watchlist() -> list[tuple[str, str]]:
-    """스크리닝 대상 종목 리스트 반환 (기본 관심종목 사용)"""
+
+def get_watchlist(market: str = "kr") -> list[tuple[str, str]]:
+    """스크리닝 대상 종목 리스트 (market: 'kr' | 'us')"""
+    if market == "us":
+        return US_WATCHLIST.copy()
     return DEFAULT_WATCHLIST.copy()
+
+
+# 미국 시장 스캔용 추가 종목
+US_MARKET_SCAN: list[tuple[str, str]] = [
+    ("DIS", "Walt Disney"),
+    ("NFLX", "Netflix"),
+    ("ADBE", "Adobe"),
+    ("CRM", "Salesforce"),
+    ("ORCL", "Oracle"),
+    ("INTC", "Intel"),
+    ("AMD", "AMD"),
+    ("AVGO", "Broadcom"),
+    ("QCOM", "Qualcomm"),
+    ("TXN", "Texas Instruments"),
+    ("KO", "Coca-Cola"),
+    ("PEP", "PepsiCo"),
+    ("COST", "Costco"),
+    ("MCD", "McDonald's"),
+    ("NKE", "Nike"),
+    ("BA", "Boeing"),
+    ("AXP", "American Express"),
+    ("MA", "Mastercard"),
+    ("PYPL", "PayPal"),
+    ("ABBV", "AbbVie"),
+    ("TMO", "Thermo Fisher"),
+    ("LLY", "Eli Lilly"),
+]
+
+
+def get_market_scan_universe(market: str = "kr", limit: int = 25) -> list[tuple[str, str]]:
+    """
+    시장 스캔용 종목 리스트 (전체 시장 일부)
+    - 한국: KOSPI + KOSDAQ 리스트에서 상위 limit종
+    - 미국: 관심종목 + 확장 리스트
+    """
+    if market == "us":
+        return (US_WATCHLIST + US_MARKET_SCAN)[:limit]
+    try:
+        kospi = fetch_symbol_list("KOSPI", limit=25)
+        kosdaq = fetch_symbol_list("KOSDAQ", limit=20)
+        seen = set()
+        result = []
+        for c, n in kospi + kosdaq:
+            if c not in seen:
+                seen.add(c)
+                result.append((c, n))
+            if len(result) >= limit:
+                break
+        return result[:limit] if result else DEFAULT_WATCHLIST.copy()[:limit]
+    except Exception:
+        return DEFAULT_WATCHLIST.copy()[:limit]
 
 
 # 샛별형 스크리닝용 종목 풀 (KOSDAQ + 중소형 KOSPI)
